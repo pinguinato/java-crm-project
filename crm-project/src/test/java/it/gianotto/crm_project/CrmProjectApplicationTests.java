@@ -8,6 +8,7 @@ class CrmProjectApplicationTests {
 
 	@Test
 	void contextLoads() {
+        // empty test
 	}
 
 }
