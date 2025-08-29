@@ -2,14 +2,13 @@ package it.gianotto.crm_project.contact.data.entity;
 
 import it.gianotto.crm_project.contact.ContactStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Contact {
 
     @Id
@@ -28,5 +27,4 @@ public class Contact {
 
     @Enumerated(EnumType.STRING)
     private ContactStatus status;
-
 }
