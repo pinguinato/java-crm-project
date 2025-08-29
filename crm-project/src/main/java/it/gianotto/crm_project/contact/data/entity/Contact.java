@@ -1,5 +1,6 @@
-package it.gianotto.crm_project.contact;
+package it.gianotto.crm_project.contact.data.entity;
 
+import it.gianotto.crm_project.contact.ContactStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
