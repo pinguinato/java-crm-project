@@ -36,4 +36,30 @@ public class ContatcServiceImpl implements ContactService {
 
         return contactRepository.save(contact);
     }
+
+    @Override
+    public void removeContact(Integer id) {
+        log.info("{} - removeContact({})", SERVICE_NAME, id);
+        if (!contactRepository.existsById(id)) {
+            log.error("Contact with id: {} does not exist", id);
+            throw new IllegalStateException("Contact with id: " + id + " does not exist.");
+        }
+        contactRepository.deleteById(id);
+    }
+
+    @Override
+    public Contact updateContact(Integer id, Contact updatedContact) {
+        log.info("{} - updateContact({}, {})", SERVICE_NAME, id, updatedContact);
+        Contact existingContact = contactRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("Contact with id: " + id + " does not exist."));
+
+        existingContact.setFirstName(updatedContact.getFirstName());
+        existingContact.setLastName(updatedContact.getLastName());
+        existingContact.setEmail(updatedContact.getEmail());
+        existingContact.setPhone(updatedContact.getPhone());
+        existingContact.setCompanyName(updatedContact.getCompanyName());
+        existingContact.setStatus(updatedContact.getStatus());
+
+        return contactRepository.save(existingContact);
+    }
 }
