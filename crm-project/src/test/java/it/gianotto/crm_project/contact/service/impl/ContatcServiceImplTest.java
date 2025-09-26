@@ -99,6 +99,7 @@ class ContatcServiceImplTest {
                 .email("mario@old.com")
                 .phone("123")
                 .companyName("OldCo")
+                .status(ContactStatus.LEAD)
                 .build();
 
         Contact updated = Contact.builder()
@@ -107,6 +108,7 @@ class ContatcServiceImplTest {
                 .email("luigi@new.com")
                 .phone("456")
                 .companyName("NewCo")
+                .status(ContactStatus.CUSTOMER)
                 .build();
 
         when(contactRepository.findById(id)).thenReturn(Optional.of(existing));
