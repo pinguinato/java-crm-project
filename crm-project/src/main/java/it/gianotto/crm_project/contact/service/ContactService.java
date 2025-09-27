@@ -1,15 +1,16 @@
 package it.gianotto.crm_project.contact.service;
 
 import it.gianotto.crm_project.contact.data.entity.Contact;
+import it.gianotto.crm_project.contact.service.dto.ContactDTO;
 
 import java.util.List;
 
 public interface ContactService {
     /**
      * Retrieve all Contacts
-     * @return a list of all Contacts entities
+     * @return a list of all Contacts dto
      */
-    List<Contact> getContacts();
+    List<ContactDTO> getContacts();
 
     /**
      * Adds a new contact to the system after validating it

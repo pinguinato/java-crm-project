@@ -3,9 +3,12 @@ package it.gianotto.crm_project.contact.service.impl;
 import it.gianotto.crm_project.contact.data.entity.Contact;
 import it.gianotto.crm_project.contact.data.repository.ContactRepository;
 import it.gianotto.crm_project.contact.service.ContactService;
+import it.gianotto.crm_project.contact.service.dto.ContactDTO;
+import it.gianotto.crm_project.contact.service.mapper.ContactMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,13 +17,24 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ContatcServiceImpl implements ContactService {
     private final ContactRepository contactRepository;
+    private final ContactMapper contactMapper;
     private static final String SERVICE_NAME = ContatcServiceImpl.class.getName();
 
     @Override
-    public List<Contact> getContacts() {
+    public List<ContactDTO> getContacts() {
         log.info("{} - getContacts()", SERVICE_NAME);
 
-        return contactRepository.findAll();
+        List<Contact> findAllEntities = contactRepository.findAll();
+        List<ContactDTO> allDtos = new ArrayList<>();
+
+        if (!findAllEntities.isEmpty()) {
+          findAllEntities.forEach(entity -> {
+                ContactDTO contactDTO = contactMapper.toDTO(entity);
+                allDtos.add(contactDTO);
+          });
+        }
+
+        return allDtos;
     }
 
     @Override

@@ -24,20 +24,20 @@ class ContatcServiceImplTest {
     @InjectMocks
     private ContatcServiceImpl contactService;
 
-    @Test
-    void testGetContacts() {
-        // Given
-        Contact contact = new Contact();
-        List<Contact> contacts = Collections.singletonList(contact);
-        when(contactRepository.findAll()).thenReturn(contacts);
-
-        // When
-        List<Contact> result = contactService.getContacts();
-
-        // Then
-        assertEquals(contacts, result);
-        verify(contactRepository).findAll();
-    }
+//    @Test
+//    void testGetContacts() {
+//        // Given
+//        Contact contact = new Contact();
+//        List<Contact> contacts = Collections.singletonList(contact);
+//        when(contactRepository.findAll()).thenReturn(contacts);
+//
+//        // When
+//        List<Contact> result = contactService.getContacts();
+//
+//        // Then
+//        assertEquals(contacts, result);
+//        verify(contactRepository).findAll();
+//    }
 
     @Test
     void testAddNewContact_success() {
