@@ -137,48 +137,60 @@ class ContatcServiceImplTest {
 
     @Test
     void testUpdateContact_success() {
-        ContactStatus status = ContactStatus.LEAD;
+        // Given
         Integer id = 1;
-        Contact existing = Contact.builder()
-                .id(id)
-                .firstName("Mario")
-                .lastName("Rossi")
-                .email("mario@old.com")
-                .phone("123")
-                .companyName("OldCo")
-                .status(ContactStatus.LEAD)
-                .build();
-
-        Contact updated = Contact.builder()
+        ContactDTO updateRequestDTO = ContactDTO.builder()
                 .firstName("Luigi")
                 .lastName("Verdi")
-                .email("luigi@new.com")
-                .phone("456")
-                .companyName("NewCo")
+                .email("luigi.verdi@example.com")
                 .status(ContactStatus.CUSTOMER)
                 .build();
 
-        when(contactRepository.findById(id)).thenReturn(Optional.of(existing));
+        Contact existingContact = Contact.builder()
+                .id(id)
+                .firstName("Mario")
+                .lastName("Rossi")
+                .email("mario.rossi@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        // Mocking
+        when(contactRepository.findById(id)).thenReturn(Optional.of(existingContact));
+        when(contactRepository.findByEmail(updateRequestDTO.getEmail())).thenReturn(Optional.empty()); // Nuova email non esiste
         when(contactRepository.save(any(Contact.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        // Simula la mappatura del DTO di ritorno
+        when(contactMapper.toDTO(any(Contact.class))).thenAnswer(invocation -> {
+            Contact c = invocation.getArgument(0);
+            return ContactDTO.builder()
+                    .id(c.getId())
+                    .firstName(c.getFirstName())
+                    .lastName(c.getLastName())
+                    .email(c.getEmail())
+                    .status(c.getStatus())
+                    .build();
+        });
 
-        Contact result = contactService.updateContact(id, updated);
+        // When
+        ContactDTO resultDTO = contactService.updateContact(id, updateRequestDTO);
 
-        assertEquals("Luigi", result.getFirstName());
-        assertEquals("Verdi", result.getLastName());
-        assertEquals("luigi@new.com", result.getEmail());
-        assertEquals("456", result.getPhone());
-        assertEquals("NewCo", result.getCompanyName());
+        // Then
+        assertNotNull(resultDTO);
+        assertEquals(id, resultDTO.getId());
+        assertEquals("Luigi", resultDTO.getFirstName());
+        assertEquals("luigi.verdi@example.com", resultDTO.getEmail());
         verify(contactRepository).findById(id);
-        verify(contactRepository).save(existing);
+        verify(contactRepository).findByEmail(updateRequestDTO.getEmail());
+        verify(contactRepository).save(existingContact);
+        verify(contactMapper).toDTO(existingContact);
     }
 
     @Test
     void testUpdateContact_notFound() {
         Integer id = 1;
-        Contact updated = new Contact();
+        ContactDTO updatedDTO = new ContactDTO();
         when(contactRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalStateException.class, () -> contactService.updateContact(id, updated));
+        assertThrows(IllegalStateException.class, () -> contactService.updateContact(id, updatedDTO));
         verify(contactRepository).findById(id);
         verify(contactRepository, never()).save(any(Contact.class));
     }

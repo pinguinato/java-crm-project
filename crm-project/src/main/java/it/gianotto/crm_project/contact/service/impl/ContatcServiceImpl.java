@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -62,18 +63,26 @@ public class ContatcServiceImpl implements ContactService {
     }
 
     @Override
-    public Contact updateContact(Integer id, Contact updatedContact) {
-        log.info("{} - updateContact({}, {})", SERVICE_NAME, id, updatedContact);
+    public ContactDTO updateContact(Integer id, ContactDTO contactDTO) {
+        log.info("{} - updateContact({}, {})", SERVICE_NAME, id, contactDTO);
+
         Contact existingContact = contactRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Contact with id: " + id + " does not exist."));
 
-        existingContact.setFirstName(updatedContact.getFirstName());
-        existingContact.setLastName(updatedContact.getLastName());
-        existingContact.setEmail(updatedContact.getEmail());
-        existingContact.setPhone(updatedContact.getPhone());
-        existingContact.setCompanyName(updatedContact.getCompanyName());
-        existingContact.setStatus(updatedContact.getStatus());
+        Optional<Contact> contactByNewEmail = contactRepository.findByEmail(contactDTO.getEmail());
+        if (contactByNewEmail.isPresent() && !contactByNewEmail.get().getId().equals(id)) {
+            throw new IllegalStateException("Email " + contactDTO.getEmail() + " is already taken by another contact.");
+        }
 
-        return contactRepository.save(existingContact);
+        existingContact.setFirstName(contactDTO.getFirstName());
+        existingContact.setLastName(contactDTO.getLastName());
+        existingContact.setEmail(contactDTO.getEmail());
+        existingContact.setPhone(contactDTO.getPhone());
+        existingContact.setCompanyName(contactDTO.getCompanyName());
+        existingContact.setStatus(contactDTO.getStatus());
+
+        Contact savedContact = contactRepository.save(existingContact);
+
+        return contactMapper.toDTO(savedContact);
     }
 }
