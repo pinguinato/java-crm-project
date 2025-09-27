@@ -65,30 +65,53 @@ class ContatcServiceImplTest {
 
     @Test
     void testAddNewContact_success() {
-        // Given
-        Contact contact = Contact.builder().email("test@example.com").build();
-        when(contactRepository.findByEmail(contact.getEmail())).thenReturn(Optional.empty());
-        when(contactRepository.save(contact)).thenReturn(contact);
+        // Given: Prepariamo il DTO in input e l'entità che verrà salvata
+        ContactDTO inputDTO = ContactDTO.builder()
+                .firstName("Nuovo")
+                .lastName("Contatto")
+                .email("nuovo@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        Contact contactToSave = new Contact(); // L'entità senza ID che viene passata al save
+
+        Contact savedContact = Contact.builder() // L'entità come restituita dal DB, con ID
+                .id(100)
+                .firstName("Nuovo")
+                .lastName("Contatto")
+                .email("nuovo@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        // Mocking delle chiamate
+        when(contactRepository.findByEmail(inputDTO.getEmail())).thenReturn(Optional.empty());
+        when(contactMapper.toEntity(inputDTO)).thenReturn(contactToSave);
+        when(contactRepository.save(contactToSave)).thenReturn(savedContact);
+        when(contactMapper.toDTO(savedContact)).thenReturn(ContactDTO.builder().id(100).email("nuovo@example.com").build()); // DTO finale
 
         // When
-        Contact result = contactService.addNewContact(contact);
+        ContactDTO resultDTO = contactService.addNewContact(inputDTO);
 
         // Then
-        assertEquals(contact, result);
-        verify(contactRepository).findByEmail(contact.getEmail());
-        verify(contactRepository).save(contact);
+        assertNotNull(resultDTO);
+        assertEquals(100, resultDTO.getId()); // Verifichiamo che l'ID sia stato popolato
+        assertEquals("nuovo@example.com", resultDTO.getEmail());
+
+        verify(contactRepository).findByEmail(inputDTO.getEmail());
+        verify(contactRepository).save(contactToSave);
+        verify(contactMapper).toDTO(savedContact);
     }
 
     @Test
     void testAddNewContact_emailExists() {
         // Given
-        Contact contact = Contact.builder().email("test@example.com").build();
-        when(contactRepository.findByEmail(contact.getEmail())).thenReturn(Optional.of(contact));
+        ContactDTO existingDTO = ContactDTO.builder().email("test@example.com").build();
+        when(contactRepository.findByEmail(existingDTO.getEmail())).thenReturn(Optional.of(new Contact()));
 
         // When & Then
-        assertThrows(IllegalStateException.class, () -> contactService.addNewContact(contact));
-        verify(contactRepository).findByEmail(contact.getEmail());
-        verify(contactRepository, never()).save(contact);
+        assertThrows(IllegalStateException.class, () -> contactService.addNewContact(existingDTO));
+        verify(contactRepository).findByEmail(existingDTO.getEmail());
+        verify(contactRepository, never()).save(any(Contact.class));
     }
 
     @Test

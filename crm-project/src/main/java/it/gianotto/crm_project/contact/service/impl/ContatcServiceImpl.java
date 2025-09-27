@@ -38,17 +38,18 @@ public class ContatcServiceImpl implements ContactService {
     }
 
     @Override
-    public Contact addNewContact(Contact contact) {
-        log.info("{} - addNewContact({})", SERVICE_NAME, contact);
+    public ContactDTO addNewContact(ContactDTO contactDTO) {
+        log.info("{} - addNewContact({})", SERVICE_NAME, contactDTO);
 
-        Optional<Contact> contactOptional = contactRepository.findByEmail(contact.getEmail());
+        contactRepository.findByEmail(contactDTO.getEmail()).ifPresent(c -> {
+            log.error("{} - A contact with email: {} already exists:", SERVICE_NAME, c.getEmail());
+            throw new IllegalStateException("A contact with email: " + c.getEmail() + " already exists.");
+        });
 
-        if (contactOptional.isPresent()) {
-            log.error("A contact with email: {} already exists:", contact.getEmail());
-            throw new IllegalStateException("A contact with email: " + contact.getEmail() + " already exists.");
-        }
+        Contact contactToSave = contactMapper.toEntity(contactDTO);
+        Contact savedContact = contactRepository.save(contactToSave);
 
-        return contactRepository.save(contact);
+        return contactMapper.toDTO(savedContact);
     }
 
     @Override

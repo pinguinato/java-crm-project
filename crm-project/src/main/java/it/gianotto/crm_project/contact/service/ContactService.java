@@ -17,7 +17,7 @@ public interface ContactService {
      * @param contact The cotact object to be added
      * @return The saved entity, including its generated ID.
      */
-    Contact addNewContact(Contact contact);
+    ContactDTO addNewContact(ContactDTO contact);
 
     /**
      * Removes a contact from the system by its ID
