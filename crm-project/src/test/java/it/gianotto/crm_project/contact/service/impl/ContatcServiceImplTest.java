@@ -3,6 +3,8 @@ package it.gianotto.crm_project.contact.service.impl;
 import it.gianotto.crm_project.contact.ContactStatus;
 import it.gianotto.crm_project.contact.data.entity.Contact;
 import it.gianotto.crm_project.contact.data.repository.ContactRepository;
+import it.gianotto.crm_project.contact.service.dto.ContactDTO;
+import it.gianotto.crm_project.contact.service.mapper.ContactMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,12 +13,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ContatcServiceImplTest {
+
+    @Mock
+    private ContactMapper contactMapper;
 
     @Mock
     private ContactRepository contactRepository;
@@ -24,20 +28,40 @@ class ContatcServiceImplTest {
     @InjectMocks
     private ContatcServiceImpl contactService;
 
-//    @Test
-//    void testGetContacts() {
-//        // Given
-//        Contact contact = new Contact();
-//        List<Contact> contacts = Collections.singletonList(contact);
-//        when(contactRepository.findAll()).thenReturn(contacts);
-//
-//        // When
-//        List<Contact> result = contactService.getContacts();
-//
-//        // Then
-//        assertEquals(contacts, result);
-//        verify(contactRepository).findAll();
-//    }
+    @Test
+    void testGetContacts() {
+        // Given: Prepariamo i dati di test
+        Contact contactEntity = Contact.builder()
+                .id(1)
+                .firstName("Mario")
+                .lastName("Rossi")
+                .email("mario.rossi@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        ContactDTO contactDTO = ContactDTO.builder()
+                .id(1)
+                .firstName("Mario")
+                .lastName("Rossi")
+                .email("mario.rossi@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        // Quando il repository viene chiamato, restituisce la nostra entità di test
+        when(contactRepository.findAll()).thenReturn(Collections.singletonList(contactEntity));
+        // Quando il mapper viene chiamato con l'entità, restituisce il nostro DTO di test
+        when(contactMapper.toDTO(contactEntity)).thenReturn(contactDTO);
+
+        // When: Eseguiamo il metodo da testare
+        List<ContactDTO> result = contactService.getContacts();
+
+        // Then: Verifichiamo i risultati
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(contactDTO, result.get(0));
+        verify(contactRepository).findAll();
+        verify(contactMapper).toDTO(contactEntity);
+    }
 
     @Test
     void testAddNewContact_success() {
