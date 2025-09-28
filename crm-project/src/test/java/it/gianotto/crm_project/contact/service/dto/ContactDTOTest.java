@@ -45,9 +45,12 @@ class ContactDTOTest {
                 .build();
 
         Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("Il nome non può essere vuoto");
-        assertThat(violations.iterator().next().getPropertyPath().toString()).isEqualTo("firstName");
+        assertThat(violations).hasSize(2); // Ora aspetta 2 violazioni
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder(
+                        "Il nome non può essere vuoto",
+                        "Il nome deve essere tra 2 e 50 caratteri"
+                );
     }
 
     @Test
@@ -60,9 +63,12 @@ class ContactDTOTest {
                 .build();
 
         Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("Il cognome non può essere vuoto");
-        assertThat(violations.iterator().next().getPropertyPath().toString()).isEqualTo("lastName");
+        assertThat(violations).hasSize(2); // Ora aspetta 2 violazioni
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder(
+                        "Il cognome non può essere vuoto",
+                        "Il cognome deve essere tra 2 e 50 caratteri"
+                );
     }
 
     @Test
@@ -137,5 +143,96 @@ class ContactDTOTest {
                 .email("mario.rossi@example.com")
                 .build();
         assertThat(dto.toString()).contains("firstName=Mario", "lastName=Rossi", "email=mario.rossi@example.com");
+    }
+
+    @Test
+    void whenFirstNameTooShort_thenViolation() {
+        ContactDTO dto = ContactDTO.builder()
+                .firstName("A") // Solo 1 carattere
+                .lastName("Rossi")
+                .email("mario.rossi@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("Il nome deve essere tra 2 e 50 caratteri");
+    }
+
+    @Test
+    void whenFirstNameTooLong_thenViolation() {
+        ContactDTO dto = ContactDTO.builder()
+                .firstName("A".repeat(51)) // 51 caratteri
+                .lastName("Rossi")
+                .email("mario.rossi@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("Il nome deve essere tra 2 e 50 caratteri");
+    }
+
+    @Test
+    void whenLastNameTooShort_thenViolation() {
+        ContactDTO dto = ContactDTO.builder()
+                .firstName("Mario")
+                .lastName("R") // Solo 1 carattere
+                .email("mario.rossi@example.com")
+                .status(ContactStatus.LEAD)
+                .build();
+
+        Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("Il cognome deve essere tra 2 e 50 caratteri");
+    }
+
+    @Test
+    void whenEmailTooLong_thenViolation() {
+        ContactDTO dto = ContactDTO.builder()
+                .firstName("Mario")
+                .lastName("Rossi")
+                .email("a".repeat(95) + "@test.com") // > 100 caratteri
+                .status(ContactStatus.LEAD)
+                .build();
+
+        Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
+        assertThat(violations).hasSize(2);
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder(
+                        "L'email non può superare i 100 caratteri",
+                        "Il formato dell'email non è valido"
+                );
+    }
+
+
+    @Test
+    void whenPhoneInvalidFormat_thenViolation() {
+        ContactDTO dto = ContactDTO.builder()
+                .firstName("Mario")
+                .lastName("Rossi")
+                .email("mario.rossi@example.com")
+                .phone("abc123") // Formato non valido
+                .status(ContactStatus.LEAD)
+                .build();
+
+        Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("Formato telefono non valido");
+    }
+
+    @Test
+    void whenCompanyNameTooLong_thenViolation() {
+        ContactDTO dto = ContactDTO.builder()
+                .firstName("Mario")
+                .lastName("Rossi")
+                .email("mario.rossi@example.com")
+                .companyName("A".repeat(101)) // > 100 caratteri
+                .status(ContactStatus.LEAD)
+                .build();
+
+        Set<ConstraintViolation<ContactDTO>> violations = validator.validate(dto);
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("Il nome dell'azienda non può superare i 100 caratteri");
     }
 }
