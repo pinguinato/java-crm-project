@@ -27,9 +27,10 @@
 		<url/>
 	</scm>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
         <postgres.version>42.4.5</postgres.version>
-        <fliway.version>11.13.2</fliway.version>
+        <flyway.version>11.13.2</flyway.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -69,13 +70,13 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${fliway.version}</version>
+            <version>${flyway.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>${fliway.version}</version>
+            <version>${flyway.version}</version>
             <scope>runtime</scope>
         </dependency>
 	</dependencies>
